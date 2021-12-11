@@ -1,6 +1,6 @@
 /* 
  * This file is part of the COOLRF HeatStick project (https://github.com/coolrf/heatstick-esphome).
- * Copyright (c) 2015 Liviu Ionescu.
+ * Copyright (c) 2021 Vyacheslav V. Anisimov. v@anisimov.org
  * 
  * This program is free software: you can redistribute it and/or modify  
  * it under the terms of the GNU General Public License as published by  
