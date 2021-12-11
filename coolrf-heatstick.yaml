@@ -1,0 +1,160 @@
+esphome:
+  name: coolrf-heatstick
+  platform: ESP8266
+  board: esp8285
+  name_add_mac_suffix: true
+  project:
+    name: "coolrf.heatstick"
+    version: "0.0.1"
+  includes:
+    - coolrf-heatstick.h
+  on_boot:
+    priority: 800
+    then:
+      - script.execute: get_status
+
+uart:
+  id: heatuart
+  tx_pin: 1
+  rx_pin: 3
+  baud_rate: 9600
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      bytes: 20
+    sequence:
+      - lambda: UARTDebug::log_hex(direction, bytes, ':');
+
+custom_component:
+- id: heatstick
+  lambda: |-
+    return {new HeatStickUART(id(heatuart))};
+
+script:
+  - id: send_data
+    then: 
+      - uart.write: !lambda
+          return heatstick_set_state_packet();
+  - id: get_status
+    then:
+      - uart.write: !lambda
+          return heatstick_get_state_packet;
+
+logger:
+  baud_rate: 0
+  tx_buffer_size: 128
+#  level: debug
+
+api:
+
+web_server:
+  port: 80
+
+packages:
+  wifi: !include ../wifi.yaml
+
+captive_portal:
+
+number:
+  - platform: template
+    id: temp_plan
+    name: "Target temperature"
+    icon: "mdi:thermometer"
+    optimistic: true # remove
+    min_value: 0
+    max_value: 30
+    step: 1
+    on_value:
+      then: 
+        - lambda: |-
+            heatstick_set_temp(x);
+
+select:
+  - platform: template
+    id: status
+    name: "Status"
+    optimistic: true
+    options:
+      - "off"
+      - "on"
+      - "block"
+    on_value:
+      then: 
+        - lambda: |-
+            heatstick_set_status(x);
+  - platform: template
+    id: power
+    name: "Power"
+    optimistic: true
+    options:
+      - "lev1"
+      - "lev2"
+      - "lev3"
+      - "lev4"
+      - "lev5"
+      - "auto"
+    on_value:
+      then: 
+        - lambda: |-
+            heatstick_set_power(x);
+  - platform: template
+    id: mode
+    name: "Mode"
+    optimistic: true
+    options:
+      - "comfort"
+      - "night"
+      - "nofrost"
+    on_value:
+      then: 
+        - lambda: |-
+            heatstick_set_mode(x);
+  - platform: template
+    id: display
+    name: "Display"
+    optimistic: true
+    options:
+      - "off"
+      - "on"
+    on_value:
+      then: 
+        - lambda: |-
+            heatstick_set_display(x);
+
+switch:
+  - platform: gpio
+    id: led
+    name: "LED"
+    pin: 13
+  - platform: template
+    name: "Get device state"
+    id: test
+    turn_on_action:
+      - script.execute: get_status
+
+# TODO: timer?
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 0
+      inverted: true
+    name: "KEY"
+
+sensor:
+  - platform: template
+    id: temp_real
+    name: "Current temperature"
+    device_class: "temperature"
+    state_class: "measurement"
+    unit_of_measurement: "°C"
+  - platform: template
+    id: power_lev
+    name: "Current power level"
+  - platform: wifi_signal
+    name: "WiFi Signal Sensor"
+    update_interval: 60s
+  - platform: uptime
+    name: Uptime Sensor
+
