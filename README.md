@@ -39,7 +39,7 @@ COOLRF HeatStick - модуль управления различными кли
 
 ### Где купить?
 
-- https://www.avito.ru/ekaterinburg/tovary_dlya_kompyutera/modul_upravleniya_konvektorom_coolrf_heatstick_2300449266
+- https://www.avito.ru/ekaterinburg/tovary_dlya_kompyutera/coolrf_heatstick_upravlenie_konvektoromboylerom_2663725969
 
 ## Сборка прошивки
 ```
